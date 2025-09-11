@@ -329,6 +329,7 @@
                                     <tr>
                                         <th>ลำดับ</th>
                                         <th>ปีงบประมาณ</th>
+                                        <th>วันที่รับเงิน</th>
                                         <th>ชื่อผู้รับเงิน</th>
                                         <th>โครงการ</th>
                                         <th>รายการ</th>
@@ -460,7 +461,7 @@
                         
                         <!-- Project and Item Details -->
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="fiscalYear" class="form-label">ปีงบประมาณ <span class="text-danger">*</span></label>
                                 <select class="form-select" id="fiscalYear" name="fiscalYear" required>
                                     <option value="">เลือกปีงบประมาณ</option>
@@ -469,11 +470,15 @@
                                     <option value="2570">2570</option>
                                 </select>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
+                                <label for="receiptDate" class="form-label">วันที่รับเงิน <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="receiptDate" name="receiptDate" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
                                 <label for="project" class="form-label">โครงการ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="project" name="project" placeholder="กรอกโครงการ" required>
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="item" class="form-label">รายการ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="item" name="item" placeholder="กรอกรายการ" required>
                             </div>
@@ -676,6 +681,7 @@
                 rules: {
                     selectedRecipient: { required: true },
                     fiscalYear: { required: true },
+                    receiptDate: { required: true },
                     project: { required: true },
                     item: { required: true },
                     amount: { required: true, min: 0.01 },
@@ -684,6 +690,7 @@
                 messages: {
                     selectedRecipient: { required: "กรุณาเลือกผู้รับเงิน" },
                     fiscalYear: { required: "กรุณาเลือกปีงบประมาณ" },
+                    receiptDate: { required: "กรุณาเลือกวันที่รับเงิน" },
                     project: { required: "กรุณากรอกโครงการ" },
                     item: { required: "กรุณากรอกรายการ" },
                     amount: { required: "กรุณากรอกจำนวนเงิน", min: "จำนวนเงินต้องมากกว่า 0" },
@@ -823,10 +830,12 @@
             const pageReceipts = receipts.slice(startIndex, endIndex);
             
             pageReceipts.forEach((receipt, index) => {
+                const receiptDate = receipt.receiptDate ? new Date(receipt.receiptDate).toLocaleDateString('th-TH') : '-';
                 const row = `
                     <tr>
                         <td>${startIndex + index + 1}</td>
                         <td>${receipt.fiscalYear || '-'}</td>
+                        <td>${receiptDate}</td>
                         <td>${receipt.recipientName}</td>
                         <td>${receipt.project}</td>
                         <td>${receipt.item}</td>
@@ -970,6 +979,7 @@
             formData.append('district', $('#receiptDistrict').val());
             formData.append('subdistrict', $('#receiptSubdistrict').val());
             formData.append('fiscalYear', $('#fiscalYear').val());
+            formData.append('receiptDate', $('#receiptDate').val());
             formData.append('project', $('#project').val());
             formData.append('item', $('#item').val());
             formData.append('amount', $('#amount').val());
@@ -1090,11 +1100,14 @@
             const receipt = receipts.find(r => r.id == id);
             if (!receipt) return;
             
+            const receiptDate = receipt.receiptDate ? new Date(receipt.receiptDate).toLocaleDateString('th-TH') : '-';
+            
             Swal.fire({
                 title: 'รายละเอียดใบสำคัญรับเงิน',
                 html: `
                     <div class="text-start">
                         <p><strong>ปีงบประมาณ:</strong> ${receipt.fiscalYear || '-'}</p>
+                        <p><strong>วันที่รับเงิน:</strong> ${receiptDate}</p>
                         <p><strong>ชื่อผู้รับเงิน:</strong> ${receipt.recipientName}</p>
                         <p><strong>ที่อยู่:</strong> ${receipt.houseNumber} หมู่ ${receipt.villageNumber || '-'}</p>
                         <p><strong>จังหวัด:</strong> ${receipt.province}</p>
@@ -1128,6 +1141,7 @@
             $('#receiptDistrict').val(receipt.district);
             $('#receiptSubdistrict').val(receipt.subdistrict);
             $('#fiscalYear').val(receipt.fiscalYear);
+            $('#receiptDate').val(receipt.receiptDate);
             $('#project').val(receipt.project);
             $('#item').val(receipt.item);
             $('#amount').val(receipt.amount);
@@ -1231,13 +1245,15 @@
                 
                 // Prepare data for sheet
                 const sheetData = [
-                    ['ลำดับ', 'ปีงบประมาณ', 'ชื่อผู้รับเงิน', 'บ้านเลขที่', 'หมู่ที่', 'ตำบล', 'อำเภอ', 'จังหวัด', 'โครงการ', 'รายการ', 'จำนวนเงิน', 'จำนวนเงินเป็นตัวหนังสือ', 'ผู้จ่ายเงินคนที่ 1', 'ผู้จ่ายเงินคนที่ 2']
+                    ['ลำดับ', 'ปีงบประมาณ', 'วันที่รับเงิน', 'ชื่อผู้รับเงิน', 'บ้านเลขที่', 'หมู่ที่', 'ตำบล', 'อำเภอ', 'จังหวัด', 'โครงการ', 'รายการ', 'จำนวนเงิน', 'จำนวนเงินเป็นตัวหนังสือ', 'ผู้จ่ายเงินคนที่ 1', 'ผู้จ่ายเงินคนที่ 2']
                 ];
 
                 yearReceipts.forEach((receipt, index) => {
+                    const receiptDate = receipt.receiptDate ? new Date(receipt.receiptDate).toLocaleDateString('th-TH') : '-';
                     sheetData.push([
                         index + 1,
                         receipt.fiscalYear || '-',
+                        receiptDate,
                         receipt.recipientName || '',
                         receipt.houseNumber || '',
                         receipt.villageNumber || '',
@@ -1260,6 +1276,7 @@
                 const colWidths = [
                     { wch: 8 },   // ลำดับ
                     { wch: 12 },  // ปีงบประมาณ
+                    { wch: 15 },  // วันที่รับเงิน
                     { wch: 25 },  // ชื่อผู้รับเงิน
                     { wch: 12 },  // บ้านเลขที่
                     { wch: 8 },   // หมู่ที่
@@ -1313,5 +1330,5 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d607f98098fce0',t:'MTc1NzU4MTgxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d82f3d16437995',t:'MTc1NzYwNDM5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
