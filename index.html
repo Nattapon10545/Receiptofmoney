@@ -313,9 +313,14 @@
                 <div class="card p-6">
                     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
                         <h4 class="kanit mb-0"><i class="fas fa-receipt text-primary me-2"></i>บันทึกรายการใบสำคัญรับเงิน</h4>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiptModal">
-                            <i class="fas fa-plus me-2"></i>เพิ่มรายการหักภาษี
-                        </button>
+                        <div>
+                            <button type="button" class="btn btn-success me-2" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel me-2"></i>Export Excel
+                            </button>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiptModal">
+                                <i class="fas fa-plus me-2"></i>เพิ่มรายการหักภาษี
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -323,6 +328,7 @@
                                 <thead>
                                     <tr>
                                         <th>ลำดับ</th>
+                                        <th>ปีงบประมาณ</th>
                                         <th>ชื่อผู้รับเงิน</th>
                                         <th>โครงการ</th>
                                         <th>รายการ</th>
@@ -454,11 +460,20 @@
                         
                         <!-- Project and Item Details -->
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
+                                <label for="fiscalYear" class="form-label">ปีงบประมาณ <span class="text-danger">*</span></label>
+                                <select class="form-select" id="fiscalYear" name="fiscalYear" required>
+                                    <option value="">เลือกปีงบประมาณ</option>
+                                    <option value="2568">2568</option>
+                                    <option value="2569">2569</option>
+                                    <option value="2570">2570</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
                                 <label for="project" class="form-label">โครงการ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="project" name="project" placeholder="กรอกโครงการ" required>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label for="item" class="form-label">รายการ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="item" name="item" placeholder="กรอกรายการ" required>
                             </div>
@@ -539,6 +554,9 @@
     
     <!-- Loading Overlay -->
     <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+    
+    <!-- SheetJS for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <script>
         // Configuration
@@ -657,6 +675,7 @@
             $('#receiptForm').validate({
                 rules: {
                     selectedRecipient: { required: true },
+                    fiscalYear: { required: true },
                     project: { required: true },
                     item: { required: true },
                     amount: { required: true, min: 0.01 },
@@ -664,6 +683,7 @@
                 },
                 messages: {
                     selectedRecipient: { required: "กรุณาเลือกผู้รับเงิน" },
+                    fiscalYear: { required: "กรุณาเลือกปีงบประมาณ" },
                     project: { required: "กรุณากรอกโครงการ" },
                     item: { required: "กรุณากรอกรายการ" },
                     amount: { required: "กรุณากรอกจำนวนเงิน", min: "จำนวนเงินต้องมากกว่า 0" },
@@ -806,6 +826,7 @@
                 const row = `
                     <tr>
                         <td>${startIndex + index + 1}</td>
+                        <td>${receipt.fiscalYear || '-'}</td>
                         <td>${receipt.recipientName}</td>
                         <td>${receipt.project}</td>
                         <td>${receipt.item}</td>
@@ -948,6 +969,7 @@
             formData.append('province', $('#receiptProvince').val());
             formData.append('district', $('#receiptDistrict').val());
             formData.append('subdistrict', $('#receiptSubdistrict').val());
+            formData.append('fiscalYear', $('#fiscalYear').val());
             formData.append('project', $('#project').val());
             formData.append('item', $('#item').val());
             formData.append('amount', $('#amount').val());
@@ -1072,6 +1094,7 @@
                 title: 'รายละเอียดใบสำคัญรับเงิน',
                 html: `
                     <div class="text-start">
+                        <p><strong>ปีงบประมาณ:</strong> ${receipt.fiscalYear || '-'}</p>
                         <p><strong>ชื่อผู้รับเงิน:</strong> ${receipt.recipientName}</p>
                         <p><strong>ที่อยู่:</strong> ${receipt.houseNumber} หมู่ ${receipt.villageNumber || '-'}</p>
                         <p><strong>จังหวัด:</strong> ${receipt.province}</p>
@@ -1104,6 +1127,7 @@
             $('#receiptProvince').val(receipt.province);
             $('#receiptDistrict').val(receipt.district);
             $('#receiptSubdistrict').val(receipt.subdistrict);
+            $('#fiscalYear').val(receipt.fiscalYear);
             $('#project').val(receipt.project);
             $('#item').val(receipt.item);
             $('#amount').val(receipt.amount);
@@ -1180,6 +1204,114 @@
         $('#receiptModal').on('hidden.bs.modal', function() {
             resetReceiptForm();
         });
+
+        // Export to Excel function
+        function exportToExcel() {
+            if (receipts.length === 0) {
+                Swal.fire('ไม่มีข้อมูล', 'ไม่มีข้อมูลใบสำคัญรับเงินสำหรับ Export', 'warning');
+                return;
+            }
+
+            // Group receipts by fiscal year
+            const receiptsByYear = {};
+            receipts.forEach(receipt => {
+                const year = receipt.fiscalYear || 'ไม่ระบุปี';
+                if (!receiptsByYear[year]) {
+                    receiptsByYear[year] = [];
+                }
+                receiptsByYear[year].push(receipt);
+            });
+
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+
+            // Create sheets for each fiscal year
+            Object.keys(receiptsByYear).sort().forEach(year => {
+                const yearReceipts = receiptsByYear[year];
+                
+                // Prepare data for sheet
+                const sheetData = [
+                    ['ลำดับ', 'ปีงบประมาณ', 'ชื่อผู้รับเงิน', 'บ้านเลขที่', 'หมู่ที่', 'ตำบล', 'อำเภอ', 'จังหวัด', 'โครงการ', 'รายการ', 'จำนวนเงิน', 'จำนวนเงินเป็นตัวหนังสือ', 'ผู้จ่ายเงินคนที่ 1', 'ผู้จ่ายเงินคนที่ 2']
+                ];
+
+                yearReceipts.forEach((receipt, index) => {
+                    sheetData.push([
+                        index + 1,
+                        receipt.fiscalYear || '-',
+                        receipt.recipientName || '',
+                        receipt.houseNumber || '',
+                        receipt.villageNumber || '',
+                        receipt.subdistrict || '',
+                        receipt.district || '',
+                        receipt.province || '',
+                        receipt.project || '',
+                        receipt.item || '',
+                        parseFloat(receipt.amount || 0),
+                        receipt.amountText || '',
+                        receipt.payer1 || '',
+                        receipt.payer2 || ''
+                    ]);
+                });
+
+                // Create worksheet
+                const ws = XLSX.utils.aoa_to_sheet(sheetData);
+
+                // Set column widths
+                const colWidths = [
+                    { wch: 8 },   // ลำดับ
+                    { wch: 12 },  // ปีงบประมาณ
+                    { wch: 25 },  // ชื่อผู้รับเงิน
+                    { wch: 12 },  // บ้านเลขที่
+                    { wch: 8 },   // หมู่ที่
+                    { wch: 15 },  // ตำบล
+                    { wch: 15 },  // อำเภอ
+                    { wch: 15 },  // จังหวัด
+                    { wch: 20 },  // โครงการ
+                    { wch: 20 },  // รายการ
+                    { wch: 15 },  // จำนวนเงิน
+                    { wch: 30 },  // จำนวนเงินเป็นตัวหนังสือ
+                    { wch: 20 },  // ผู้จ่ายเงินคนที่ 1
+                    { wch: 20 }   // ผู้จ่ายเงินคนที่ 2
+                ];
+                ws['!cols'] = colWidths;
+
+                // Style header row
+                const headerRange = XLSX.utils.decode_range(ws['!ref']);
+                for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+                    if (!ws[cellAddress]) continue;
+                    ws[cellAddress].s = {
+                        font: { bold: true, color: { rgb: "FFFFFF" } },
+                        fill: { fgColor: { rgb: "F8BBD9" } },
+                        alignment: { horizontal: "center", vertical: "center" }
+                    };
+                }
+
+                // Add worksheet to workbook
+                const sheetName = `ปีงบประมาณ ${year}`;
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            });
+
+            // Generate filename with current date
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).replace(/\//g, '-');
+            
+            const filename = `ใบสำคัญรับเงิน_${dateStr}.xlsx`;
+
+            // Save file
+            XLSX.writeFile(wb, filename);
+
+            Swal.fire({
+                title: 'Export สำเร็จ',
+                text: `ไฟล์ ${filename} ถูกดาวน์โหลดเรียบร้อยแล้ว`,
+                icon: 'success',
+                confirmButtonColor: '#f8bbd9'
+            });
+        }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d5f0b7c783fce0',t:'MTc1NzU4MDg2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d607f98098fce0',t:'MTc1NzU4MTgxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
