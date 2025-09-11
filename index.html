@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบใบสำคัญรับเงิน - โรงเรียนบ้านกิ่วพร้าว</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <!-- Loading Overlay -->
+    <link href="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #f8bbd9;
+            --secondary-color: #f4a6cd;
+            --accent-color: #e91e63;
+            --light-pink: #fce4ec;
+            --text-dark: #2c3e50;
+            --text-muted: #6c757d;
+        }
+        
+        * {
+            font-family: 'Sarabun', sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6, .kanit {
+            font-family: 'Kanit', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--light-pink) 0%, #fff 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            color: white !important;
+        }
+        
+        .school-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-right: 15px;
+        }
+        
+        .main-container {
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .nav-pills .nav-link {
+            border-radius: 15px;
+            margin: 0 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+        
+        .nav-pills .nav-link:not(.active) {
+            color: var(--text-muted);
+            background: var(--light-pink);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(248, 187, 217, 0.4);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .table {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .table thead th {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 15px;
+        }
+        
+        .table tbody td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            border-color: #f8f9fa;
+        }
+        
+        .table tbody tr:hover {
+            background-color: var(--light-pink);
+        }
+        
+        .modal-content {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            border: none;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(248, 187, 217, 0.25);
+        }
+        
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            border: none;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-view {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .btn-edit {
+            background: #ffc107;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .pagination .page-link {
+            border-radius: 8px;
+            margin: 0 2px;
+            border: none;
+            color: var(--primary-color);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .loading-overlay {
+            background: rgba(248, 187, 217, 0.9) !important;
+        }
+        
+        @media (max-width: 768px) {
+            .school-logo {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .navbar-brand {
+                font-size: 1rem;
+            }
+            
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+            
+            .action-btn {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="https://lh3.googleusercontent.com/d/1vQtWxoqhL4BWuOmDehWMGTqoRh63AThV" alt="โรงเรียนบ้านกิ่วพร้าว" class="school-logo">
+                <span class="kanit">ระบบใบสำคัญรับเงิน - โรงเรียนบ้านกิ่วพร้าว</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        <!-- Navigation Tabs -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <ul class="nav nav-pills justify-content-center" id="mainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active kanit" id="recipients-tab" data-bs-toggle="pill" data-bs-target="#recipients" type="button" role="tab">
+                            <i class="fas fa-users me-2"></i>ข้อมูลผู้รับเงิน
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link kanit" id="receipts-tab" data-bs-toggle="pill" data-bs-target="#receipts" type="button" role="tab">
+                            <i class="fas fa-receipt me-2"></i>บันทึกรายการใบสำคัญรับเงิน
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Recipients Tab -->
+            <div class="tab-pane fade show active" id="recipients" role="tabpanel">
+                <div class="card p-6">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                        <h4 class="kanit mb-0"><i class="fas fa-users text-primary me-2"></i>ข้อมูลผู้รับเงิน</h4>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recipientModal">
+                            <i class="fas fa-plus me-2"></i>เพิ่มผู้รับเงิน
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ลำดับ</th>
+                                        <th>ชื่อ</th>
+                                        <th>ที่อยู่</th>
+                                        <th>จังหวัด</th>
+                                        <th>การจัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recipientsTableBody">
+                                    <!-- Data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav aria-label="Recipients pagination">
+                            <ul class="pagination justify-content-center" id="recipientsPagination">
+                                <!-- Pagination will be generated here -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receipts Tab -->
+            <div class="tab-pane fade" id="receipts" role="tabpanel">
+                <div class="card p-6">
+                    <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
+                        <h4 class="kanit mb-0"><i class="fas fa-receipt text-primary me-2"></i>บันทึกรายการใบสำคัญรับเงิน</h4>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#receiptModal">
+                            <i class="fas fa-plus me-2"></i>เพิ่มรายการหักภาษี
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ลำดับ</th>
+                                        <th>ชื่อผู้รับเงิน</th>
+                                        <th>โครงการ</th>
+                                        <th>รายการ</th>
+                                        <th>จำนวนเงิน</th>
+                                        <th>การจัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="receiptsTableBody">
+                                    <!-- Data will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav aria-label="Receipts pagination">
+                            <ul class="pagination justify-content-center" id="receiptsPagination">
+                                <!-- Pagination will be generated here -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipient Modal -->
+    <div class="modal fade" id="recipientModal" tabindex="-1" aria-labelledby="recipientModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title kanit" id="recipientModalLabel">เพิ่มข้อมูลผู้รับเงิน</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="recipientForm">
+                        <input type="hidden" id="recipientId" name="recipientId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="recipientName" class="form-label">ชื่อ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="recipientName" name="recipientName" placeholder="กรอกชื่อ" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="houseNumber" class="form-label">บ้านเลขที่ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="houseNumber" name="houseNumber" placeholder="กรอกบ้านเลขที่" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="villageNumber" class="form-label">หมู่ที่</label>
+                                <input type="text" class="form-control" id="villageNumber" name="villageNumber" placeholder="กรอกหมู่ที่">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="province" class="form-label">จังหวัด <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="province" name="province" placeholder="กรอกจังหวัด" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="district" class="form-label">อำเภอ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="district" name="district" placeholder="กรอกอำเภอ" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="subdistrict" class="form-label">ตำบล <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="subdistrict" name="subdistrict" placeholder="กรอกตำบล" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>ยกเลิก
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveRecipient()">
+                        <img src="https://lh3.googleusercontent.com/d/154WVAys5NkYoSTgo1QHQE6gLXqj5KYvr" alt="บันทึก" style="width: 16px; height: 16px; margin-right: 8px;">
+                        บันทึก
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title kanit" id="receiptModalLabel">เพิ่มรายการหักภาษี</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="receiptForm">
+                        <input type="hidden" id="receiptId" name="receiptId">
+                        
+                        <!-- Recipient Selection -->
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="selectedRecipient" class="form-label">เลือกผู้รับเงิน <span class="text-danger">*</span></label>
+                                <select class="form-select" id="selectedRecipient" name="selectedRecipient" required>
+                                    <option value="">เลือกผู้รับเงิน</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Address Fields (Auto-filled) -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="receiptHouseNumber" class="form-label">บ้านเลขที่</label>
+                                <input type="text" class="form-control" id="receiptHouseNumber" name="receiptHouseNumber" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="receiptVillageNumber" class="form-label">หมู่ที่</label>
+                                <input type="text" class="form-control" id="receiptVillageNumber" name="receiptVillageNumber" readonly>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="receiptProvince" class="form-label">จังหวัด</label>
+                                <input type="text" class="form-control" id="receiptProvince" name="receiptProvince" readonly>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="receiptDistrict" class="form-label">อำเภอ</label>
+                                <input type="text" class="form-control" id="receiptDistrict" name="receiptDistrict" readonly>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="receiptSubdistrict" class="form-label">ตำบล</label>
+                                <input type="text" class="form-control" id="receiptSubdistrict" name="receiptSubdistrict" readonly>
+                            </div>
+                        </div>
+                        
+                        <!-- Project and Item Details -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="project" class="form-label">โครงการ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="project" name="project" placeholder="กรอกโครงการ" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="item" class="form-label">รายการ <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="item" name="item" placeholder="กรอกรายการ" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Amount -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="amount" class="form-label">จำนวนเงิน <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" placeholder="0.00" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="amountText" class="form-label">จำนวนเงินเป็นตัวหนังสือ</label>
+                                <input type="text" class="form-control" id="amountText" name="amountText" readonly>
+                            </div>
+                        </div>
+                        
+                        <!-- Payers -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="payer1" class="form-label">ผู้จ่ายเงินคนที่ 1 <span class="text-danger">*</span></label>
+                                <select class="form-select" id="payer1" name="payer1" required>
+                                    <option value="">เลือกผู้จ่ายเงิน</option>
+                                    <option value="นางนรินภรณ์ อินมา">นางนรินภรณ์ อินมา</option>
+                                    <option value="นายณัฐพล ผิวพันธ์">นายณัฐพล ผิวพันธ์</option>
+                                    <option value="นางสาวจรัสโฉม กุมมาลือ">นางสาวจรัสโฉม กุมมาลือ</option>
+                                    <option value="นางสาวประกายสรวง วงค์วิริยะ">นางสาวประกายสรวง วงค์วิริยะ</option>
+                                    <option value="นางสาววษา บุญเจริญ">นางสาววษา บุญเจริญ</option>
+                                    <option value="นางสาวนิภาพร ชื่นดี">นางสาวนิภาพร ชื่นดี</option>
+                                    <option value="นายทวีวัฒน์ ทายะนา">นายทวีวัฒน์ ทายะนา</option>
+                                    <option value="นางสาวชลธิชา แก้วรากมุข">นางสาวชลธิชา แก้วรากมุข</option>
+                                    <option value="นางสาวช่อผกา กันทาเดช">นางสาวช่อผกา กันทาเดช</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="payer2" class="form-label">ผู้จ่ายเงินคนที่ 2</label>
+                                <select class="form-select" id="payer2" name="payer2">
+                                    <option value="">เลือกผู้จ่ายเงิน</option>
+                                    <option value="นางนรินภรณ์ อินมา">นางนรินภรณ์ อินมา</option>
+                                    <option value="นายณัฐพล ผิวพันธ์">นายณัฐพล ผิวพันธ์</option>
+                                    <option value="นางสาวจรัสโฉม กุมมาลือ">นางสาวจรัสโฉม กุมมาลือ</option>
+                                    <option value="นางสาวประกายสรวง วงค์วิริยะ">นางสาวประกายสรวง วงค์วิริยะ</option>
+                                    <option value="นางสาววษา บุญเจริญ">นางสาววษา บุญเจริญ</option>
+                                    <option value="นางสาวนิภาพร ชื่นดี">นางสาวนิภาพร ชื่นดี</option>
+                                    <option value="นายทวีวัฒน์ ทายะนา">นายทวีวัฒน์ ทายะนา</option>
+                                    <option value="นางสาวชลธิชา แก้วรากมุข">นางสาวชลธิชา แก้วรากมุข</option>
+                                    <option value="นางสาวช่อผกา กันทาเดช">นางสาวช่อผกา กันทาเดช</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>ยกเลิก
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveReceipt()">
+                        <img src="https://lh3.googleusercontent.com/d/154WVAys5NkYoSTgo1QHQE6gLXqj5KYvr" alt="บันทึก" style="width: 16px; height: 16px; margin-right: 8px;">
+                        บันทึก
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Bootstrap 5 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery Validate -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/additional-methods.min.js"></script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    
+    <!-- Loading Overlay -->
+    <script src="https://cdn.jsdelivr.net/npm/gasparesganga-jquery-loading-overlay@2.1.7/dist/loadingoverlay.min.js"></script>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbwBzFHhBPxGZifeKA4Hgu-loT_2KUw8NXCtc_kiIcwGDUiMw1j7IJZSvDfgQkIe5QHX/exec',
+            SHEET_ID: '16AHiv78fcW-8IRxu5hPGIiYkfZM7BOoEUzmQkBfJXyQ',
+            ITEMS_PER_PAGE: 20
+        };
+
+        // Global variables
+        let recipients = [];
+        let receipts = [];
+        let currentRecipientPage = 1;
+        let currentReceiptPage = 1;
+        let editingRecipientId = null;
+        let editingReceiptId = null;
+
+        // Number to Thai text conversion
+        function numberToThaiText(num) {
+            const ones = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า'];
+            const tens = ['', '', 'ยี่สิบ', 'สามสิบ', 'สี่สิบ', 'ห้าสิบ', 'หกสิบ', 'เจ็ดสิบ', 'แปดสิบ', 'เก้าสิบ'];
+            const units = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน'];
+            
+            if (num === 0) return 'ศูนย์บาท';
+            
+            let result = '';
+            let numStr = Math.floor(num).toString();
+            let decimal = Math.round((num - Math.floor(num)) * 100);
+            
+            // Convert integer part
+            for (let i = 0; i < numStr.length; i++) {
+                let digit = parseInt(numStr[i]);
+                let position = numStr.length - i - 1;
+                
+                if (digit !== 0) {
+                    if (position === 1 && digit === 1) {
+                        result += 'สิบ';
+                    } else if (position === 1 && digit === 2) {
+                        result += 'ยี่สิบ';
+                    } else {
+                        result += ones[digit];
+                        if (position > 0) result += units[position];
+                    }
+                }
+            }
+            
+            result += 'บาท';
+            
+            // Convert decimal part
+            if (decimal > 0) {
+                result += numberToThaiText(decimal).replace('บาท', 'สตางค์');
+            } else {
+                result += 'ถ้วน';
+            }
+            
+            return result;
+        }
+
+        // Initialize the application
+        $(document).ready(function() {
+            initializeValidation();
+            loadData();
+            setupEventListeners();
+        });
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Selected recipient change handler
+            $('#selectedRecipient').change(function() {
+                const recipientId = $(this).val();
+                if (recipientId) {
+                    const recipient = recipients.find(r => r.id == recipientId);
+                    if (recipient) {
+                        $('#receiptHouseNumber').val(recipient.houseNumber);
+                        $('#receiptVillageNumber').val(recipient.villageNumber);
+                        $('#receiptProvince').val(recipient.province);
+                        $('#receiptDistrict').val(recipient.district);
+                        $('#receiptSubdistrict').val(recipient.subdistrict);
+                    }
+                }
+            });
+
+            // Amount change handler
+            $('#amount').on('input', function() {
+                const amount = parseFloat($(this).val()) || 0;
+                $('#amountText').val(numberToThaiText(amount));
+            });
+
+            // Modal backdrop click handler
+            $('.modal').on('click', function(e) {
+                if (e.target === this) {
+                    $(this).modal('hide');
+                }
+            });
+        }
+
+        // Initialize form validation
+        function initializeValidation() {
+            $('#recipientForm').validate({
+                rules: {
+                    recipientName: { required: true, minlength: 2 },
+                    houseNumber: { required: true },
+                    province: { required: true },
+                    district: { required: true },
+                    subdistrict: { required: true }
+                },
+                messages: {
+                    recipientName: { required: "กรุณากรอกชื่อ", minlength: "ชื่อต้องมีอย่างน้อย 2 ตัวอักษร" },
+                    houseNumber: { required: "กรุณากรอกบ้านเลขที่" },
+                    province: { required: "กรุณากรอกจังหวัด" },
+                    district: { required: "กรุณากรอกอำเภอ" },
+                    subdistrict: { required: "กรุณากรอกตำบล" }
+                }
+            });
+
+            $('#receiptForm').validate({
+                rules: {
+                    selectedRecipient: { required: true },
+                    project: { required: true },
+                    item: { required: true },
+                    amount: { required: true, min: 0.01 },
+                    payer1: { required: true }
+                },
+                messages: {
+                    selectedRecipient: { required: "กรุณาเลือกผู้รับเงิน" },
+                    project: { required: "กรุณากรอกโครงการ" },
+                    item: { required: "กรุณากรอกรายการ" },
+                    amount: { required: "กรุณากรอกจำนวนเงิน", min: "จำนวนเงินต้องมากกว่า 0" },
+                    payer1: { required: "กรุณาเลือกผู้จ่ายเงินคนที่ 1" }
+                }
+            });
+        }
+
+        // Load data from Google Sheets
+        function loadData() {
+            $.LoadingOverlay('show');
+            
+            Promise.all([
+                loadRecipients(),
+                loadReceipts()
+            ]).finally(() => {
+                $.LoadingOverlay('hide');
+            });
+        }
+
+        // Load recipients
+        function loadRecipients() {
+            return fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getRecipients&sheetId=${CONFIG.SHEET_ID}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        recipients = data.data || [];
+                        renderRecipientsTable();
+                        updateRecipientSelect();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading recipients:', error);
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลผู้รับเงินได้', 'error');
+                });
+        }
+
+        // Load receipts
+        function loadReceipts() {
+            return fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getReceipts&sheetId=${CONFIG.SHEET_ID}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        receipts = data.data || [];
+                        renderReceiptsTable();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading receipts:', error);
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูลใบสำคัญรับเงินได้', 'error');
+                });
+        }
+
+        // Render recipients table
+        function renderRecipientsTable() {
+            const tbody = $('#recipientsTableBody');
+            tbody.empty();
+            
+            const startIndex = (currentRecipientPage - 1) * CONFIG.ITEMS_PER_PAGE;
+            const endIndex = startIndex + CONFIG.ITEMS_PER_PAGE;
+            const pageRecipients = recipients.slice(startIndex, endIndex);
+            
+            pageRecipients.forEach((recipient, index) => {
+                const row = `
+                    <tr>
+                        <td>${startIndex + index + 1}</td>
+                        <td>${recipient.name}</td>
+                        <td>${recipient.houseNumber} หมู่ ${recipient.villageNumber || '-'}</td>
+                        <td>${recipient.province}</td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewRecipient(${recipient.id})" title="ดูรายละเอียด">
+                                <img src="https://lh3.googleusercontent.com/d/13qxaLbH33ivpbfIfrBmylnxINq1oOLFl" alt="ดู" style="width: 16px; height: 16px;">
+                            </button>
+                            <button class="action-btn btn-edit" onclick="editRecipient(${recipient.id})" title="แก้ไข">
+                                <img src="https://lh3.googleusercontent.com/d/1J08fhv8_Lqe1O1YY4nQTSl-0WKNo3FnU" alt="แก้ไข" style="width: 16px; height: 16px;">
+                            </button>
+                            <button class="action-btn btn-delete" onclick="deleteRecipient(${recipient.id})" title="ลบ">
+                                <img src="https://lh3.googleusercontent.com/d/1CE-tDsLaAhEd3TGz877i7N3AIiYRjDlq" alt="ลบ" style="width: 16px; height: 16px;">
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+            
+            renderRecipientsPagination();
+        }
+
+        // Render recipients pagination
+        function renderRecipientsPagination() {
+            const totalPages = Math.ceil(recipients.length / CONFIG.ITEMS_PER_PAGE);
+            const pagination = $('#recipientsPagination');
+            pagination.empty();
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            pagination.append(`
+                <li class="page-item ${currentRecipientPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changeRecipientPage(${currentRecipientPage - 1})">ก่อนหน้า</a>
+                </li>
+            `);
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.append(`
+                    <li class="page-item ${i === currentRecipientPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changeRecipientPage(${i})">${i}</a>
+                    </li>
+                `);
+            }
+            
+            // Next button
+            pagination.append(`
+                <li class="page-item ${currentRecipientPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changeRecipientPage(${currentRecipientPage + 1})">ถัดไป</a>
+                </li>
+            `);
+        }
+
+        // Change recipient page
+        function changeRecipientPage(page) {
+            const totalPages = Math.ceil(recipients.length / CONFIG.ITEMS_PER_PAGE);
+            if (page >= 1 && page <= totalPages) {
+                currentRecipientPage = page;
+                renderRecipientsTable();
+            }
+        }
+
+        // Render receipts table
+        function renderReceiptsTable() {
+            const tbody = $('#receiptsTableBody');
+            tbody.empty();
+            
+            const startIndex = (currentReceiptPage - 1) * CONFIG.ITEMS_PER_PAGE;
+            const endIndex = startIndex + CONFIG.ITEMS_PER_PAGE;
+            const pageReceipts = receipts.slice(startIndex, endIndex);
+            
+            pageReceipts.forEach((receipt, index) => {
+                const row = `
+                    <tr>
+                        <td>${startIndex + index + 1}</td>
+                        <td>${receipt.recipientName}</td>
+                        <td>${receipt.project}</td>
+                        <td>${receipt.item}</td>
+                        <td>${parseFloat(receipt.amount).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</td>
+                        <td>
+                            <button class="action-btn btn-view" onclick="viewReceipt(${receipt.id})" title="ดูรายละเอียด">
+                                <img src="https://lh3.googleusercontent.com/d/13qxaLbH33ivpbfIfrBmylnxINq1oOLFl" alt="ดู" style="width: 16px; height: 16px;">
+                            </button>
+                            <button class="action-btn btn-edit" onclick="editReceipt(${receipt.id})" title="แก้ไข">
+                                <img src="https://lh3.googleusercontent.com/d/1J08fhv8_Lqe1O1YY4nQTSl-0WKNo3FnU" alt="แก้ไข" style="width: 16px; height: 16px;">
+                            </button>
+                            <button class="action-btn btn-delete" onclick="deleteReceipt(${receipt.id})" title="ลบ">
+                                <img src="https://lh3.googleusercontent.com/d/1CE-tDsLaAhEd3TGz877i7N3AIiYRjDlq" alt="ลบ" style="width: 16px; height: 16px;">
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+            
+            renderReceiptsPagination();
+        }
+
+        // Render receipts pagination
+        function renderReceiptsPagination() {
+            const totalPages = Math.ceil(receipts.length / CONFIG.ITEMS_PER_PAGE);
+            const pagination = $('#receiptsPagination');
+            pagination.empty();
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            pagination.append(`
+                <li class="page-item ${currentReceiptPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changeReceiptPage(${currentReceiptPage - 1})">ก่อนหน้า</a>
+                </li>
+            `);
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                pagination.append(`
+                    <li class="page-item ${i === currentReceiptPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="changeReceiptPage(${i})">${i}</a>
+                    </li>
+                `);
+            }
+            
+            // Next button
+            pagination.append(`
+                <li class="page-item ${currentReceiptPage === totalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="changeReceiptPage(${currentReceiptPage + 1})">ถัดไป</a>
+                </li>
+            `);
+        }
+
+        // Change receipt page
+        function changeReceiptPage(page) {
+            const totalPages = Math.ceil(receipts.length / CONFIG.ITEMS_PER_PAGE);
+            if (page >= 1 && page <= totalPages) {
+                currentReceiptPage = page;
+                renderReceiptsTable();
+            }
+        }
+
+        // Update recipient select options
+        function updateRecipientSelect() {
+            const select = $('#selectedRecipient');
+            select.empty().append('<option value="">เลือกผู้รับเงิน</option>');
+            
+            recipients.forEach(recipient => {
+                select.append(`<option value="${recipient.id}">${recipient.name}</option>`);
+            });
+        }
+
+        // Save recipient
+        function saveRecipient() {
+            if (!$('#recipientForm').valid()) return;
+            
+            $.LoadingOverlay('show');
+            
+            const formData = new URLSearchParams();
+            formData.append('action', editingRecipientId ? 'updateRecipient' : 'addRecipient');
+            formData.append('sheetId', CONFIG.SHEET_ID);
+            
+            if (editingRecipientId) {
+                formData.append('id', editingRecipientId);
+            }
+            
+            formData.append('name', $('#recipientName').val());
+            formData.append('houseNumber', $('#houseNumber').val());
+            formData.append('villageNumber', $('#villageNumber').val());
+            formData.append('province', $('#province').val());
+            formData.append('district', $('#district').val());
+            formData.append('subdistrict', $('#subdistrict').val());
+            
+            fetch(CONFIG.APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                $.LoadingOverlay('hide');
+                
+                if (data.success) {
+                    Swal.fire('สำเร็จ', 'บันทึกข้อมูลผู้รับเงินเรียบร้อยแล้ว', 'success');
+                    $('#recipientModal').modal('hide');
+                    resetRecipientForm();
+                    loadRecipients();
+                } else {
+                    Swal.fire('ข้อผิดพลาด', data.message || 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+                }
+            })
+            .catch(error => {
+                $.LoadingOverlay('hide');
+                console.error('Error saving recipient:', error);
+                Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+            });
+        }
+
+        // Save receipt
+        function saveReceipt() {
+            if (!$('#receiptForm').valid()) return;
+            
+            $.LoadingOverlay('show');
+            
+            const formData = new URLSearchParams();
+            formData.append('action', editingReceiptId ? 'updateReceipt' : 'addReceipt');
+            formData.append('sheetId', CONFIG.SHEET_ID);
+            
+            if (editingReceiptId) {
+                formData.append('id', editingReceiptId);
+            }
+            
+            const selectedRecipient = recipients.find(r => r.id == $('#selectedRecipient').val());
+            
+            formData.append('recipientId', $('#selectedRecipient').val());
+            formData.append('recipientName', selectedRecipient ? selectedRecipient.name : '');
+            formData.append('houseNumber', $('#receiptHouseNumber').val());
+            formData.append('villageNumber', $('#receiptVillageNumber').val());
+            formData.append('province', $('#receiptProvince').val());
+            formData.append('district', $('#receiptDistrict').val());
+            formData.append('subdistrict', $('#receiptSubdistrict').val());
+            formData.append('project', $('#project').val());
+            formData.append('item', $('#item').val());
+            formData.append('amount', $('#amount').val());
+            formData.append('amountText', $('#amountText').val());
+            formData.append('payer1', $('#payer1').val());
+            formData.append('payer2', $('#payer2').val());
+            
+            fetch(CONFIG.APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                $.LoadingOverlay('hide');
+                
+                if (data.success) {
+                    Swal.fire('สำเร็จ', 'บันทึกรายการใบสำคัญรับเงินเรียบร้อยแล้ว', 'success');
+                    $('#receiptModal').modal('hide');
+                    resetReceiptForm();
+                    loadReceipts();
+                } else {
+                    Swal.fire('ข้อผิดพลาด', data.message || 'ไม่สามารถบันทึกข้อมูลได้', 'error');
+                }
+            })
+            .catch(error => {
+                $.LoadingOverlay('hide');
+                console.error('Error saving receipt:', error);
+                Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการบันทึกข้อมูล', 'error');
+            });
+        }
+
+        // View recipient
+        function viewRecipient(id) {
+            const recipient = recipients.find(r => r.id == id);
+            if (!recipient) return;
+            
+            Swal.fire({
+                title: 'รายละเอียดผู้รับเงิน',
+                html: `
+                    <div class="text-start">
+                        <p><strong>ชื่อ:</strong> ${recipient.name}</p>
+                        <p><strong>บ้านเลขที่:</strong> ${recipient.houseNumber}</p>
+                        <p><strong>หมู่ที่:</strong> ${recipient.villageNumber || '-'}</p>
+                        <p><strong>จังหวัด:</strong> ${recipient.province}</p>
+                        <p><strong>อำเภอ:</strong> ${recipient.district}</p>
+                        <p><strong>ตำบล:</strong> ${recipient.subdistrict}</p>
+                    </div>
+                `,
+                confirmButtonText: 'ปิด',
+                confirmButtonColor: '#f8bbd9'
+            });
+        }
+
+        // Edit recipient
+        function editRecipient(id) {
+            const recipient = recipients.find(r => r.id == id);
+            if (!recipient) return;
+            
+            editingRecipientId = id;
+            
+            $('#recipientModalLabel').text('แก้ไขข้อมูลผู้รับเงิน');
+            $('#recipientName').val(recipient.name);
+            $('#houseNumber').val(recipient.houseNumber);
+            $('#villageNumber').val(recipient.villageNumber);
+            $('#province').val(recipient.province);
+            $('#district').val(recipient.district);
+            $('#subdistrict').val(recipient.subdistrict);
+            
+            $('#recipientModal').modal('show');
+        }
+
+        // Delete recipient
+        function deleteRecipient(id) {
+            Swal.fire({
+                title: 'ยืนยันการลบ',
+                text: 'คุณต้องการลบข้อมูลผู้รับเงินนี้หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'ลบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.LoadingOverlay('show');
+                    
+                    const formData = new URLSearchParams();
+                    formData.append('action', 'deleteRecipient');
+                    formData.append('sheetId', CONFIG.SHEET_ID);
+                    formData.append('id', id);
+                    
+                    fetch(CONFIG.APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        $.LoadingOverlay('hide');
+                        
+                        if (data.success) {
+                            Swal.fire('สำเร็จ', 'ลบข้อมูลผู้รับเงินเรียบร้อยแล้ว', 'success');
+                            loadRecipients();
+                        } else {
+                            Swal.fire('ข้อผิดพลาด', data.message || 'ไม่สามารถลบข้อมูลได้', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        $.LoadingOverlay('hide');
+                        console.error('Error deleting recipient:', error);
+                        Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการลบข้อมูล', 'error');
+                    });
+                }
+            });
+        }
+
+        // View receipt
+        function viewReceipt(id) {
+            const receipt = receipts.find(r => r.id == id);
+            if (!receipt) return;
+            
+            Swal.fire({
+                title: 'รายละเอียดใบสำคัญรับเงิน',
+                html: `
+                    <div class="text-start">
+                        <p><strong>ชื่อผู้รับเงิน:</strong> ${receipt.recipientName}</p>
+                        <p><strong>ที่อยู่:</strong> ${receipt.houseNumber} หมู่ ${receipt.villageNumber || '-'}</p>
+                        <p><strong>จังหวัด:</strong> ${receipt.province}</p>
+                        <p><strong>อำเภอ:</strong> ${receipt.district}</p>
+                        <p><strong>ตำบล:</strong> ${receipt.subdistrict}</p>
+                        <p><strong>โครงการ:</strong> ${receipt.project}</p>
+                        <p><strong>รายการ:</strong> ${receipt.item}</p>
+                        <p><strong>จำนวนเงิน:</strong> ${parseFloat(receipt.amount).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</p>
+                        <p><strong>จำนวนเงินเป็นตัวหนังสือ:</strong> ${receipt.amountText}</p>
+                        <p><strong>ผู้จ่ายเงินคนที่ 1:</strong> ${receipt.payer1}</p>
+                        ${receipt.payer2 ? `<p><strong>ผู้จ่ายเงินคนที่ 2:</strong> ${receipt.payer2}</p>` : ''}
+                    </div>
+                `,
+                confirmButtonText: 'ปิด',
+                confirmButtonColor: '#f8bbd9'
+            });
+        }
+
+        // Edit receipt
+        function editReceipt(id) {
+            const receipt = receipts.find(r => r.id == id);
+            if (!receipt) return;
+            
+            editingReceiptId = id;
+            
+            $('#receiptModalLabel').text('แก้ไขรายการหักภาษี');
+            $('#selectedRecipient').val(receipt.recipientId);
+            $('#receiptHouseNumber').val(receipt.houseNumber);
+            $('#receiptVillageNumber').val(receipt.villageNumber);
+            $('#receiptProvince').val(receipt.province);
+            $('#receiptDistrict').val(receipt.district);
+            $('#receiptSubdistrict').val(receipt.subdistrict);
+            $('#project').val(receipt.project);
+            $('#item').val(receipt.item);
+            $('#amount').val(receipt.amount);
+            $('#amountText').val(receipt.amountText);
+            $('#payer1').val(receipt.payer1);
+            $('#payer2').val(receipt.payer2);
+            
+            $('#receiptModal').modal('show');
+        }
+
+        // Delete receipt
+        function deleteReceipt(id) {
+            Swal.fire({
+                title: 'ยืนยันการลบ',
+                text: 'คุณต้องการลบรายการใบสำคัญรับเงินนี้หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'ลบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.LoadingOverlay('show');
+                    
+                    const formData = new URLSearchParams();
+                    formData.append('action', 'deleteReceipt');
+                    formData.append('sheetId', CONFIG.SHEET_ID);
+                    formData.append('id', id);
+                    
+                    fetch(CONFIG.APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        $.LoadingOverlay('hide');
+                        
+                        if (data.success) {
+                            Swal.fire('สำเร็จ', 'ลบรายการใบสำคัญรับเงินเรียบร้อยแล้ว', 'success');
+                            loadReceipts();
+                        } else {
+                            Swal.fire('ข้อผิดพลาด', data.message || 'ไม่สามารถลบข้อมูลได้', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        $.LoadingOverlay('hide');
+                        console.error('Error deleting receipt:', error);
+                        Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการลบข้อมูล', 'error');
+                    });
+                }
+            });
+        }
+
+        // Reset recipient form
+        function resetRecipientForm() {
+            $('#recipientForm')[0].reset();
+            $('#recipientModalLabel').text('เพิ่มข้อมูลผู้รับเงิน');
+            editingRecipientId = null;
+        }
+
+        // Reset receipt form
+        function resetReceiptForm() {
+            $('#receiptForm')[0].reset();
+            $('#receiptModalLabel').text('เพิ่มรายการหักภาษี');
+            editingReceiptId = null;
+        }
+
+        // Modal event handlers
+        $('#recipientModal').on('hidden.bs.modal', function() {
+            resetRecipientForm();
+        });
+
+        $('#receiptModal').on('hidden.bs.modal', function() {
+            resetReceiptForm();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d5f0b7c783fce0',t:'MTc1NzU4MDg2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
