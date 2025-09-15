@@ -840,14 +840,20 @@
             
             pageReceipts.forEach((receipt, index) => {
                 const receiptDate = receipt.receiptDate ? new Date(receipt.receiptDate).toLocaleDateString('th-TH') : '-';
+                // Truncate long text for display
+                const truncateText = (text, maxLength = 20) => {
+                    if (!text) return '-';
+                    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+                };
+                
                 const row = `
                     <tr>
                         <td>${startIndex + index + 1}</td>
                         <td>${receipt.fiscalYear || '-'}</td>
                         <td>${receiptDate}</td>
                         <td>${receipt.recipientName}</td>
-                        <td>${receipt.project}</td>
-                        <td>${receipt.item}</td>
+                        <td title="${receipt.project || ''}">${truncateText(receipt.project, 15)}</td>
+                        <td title="${receipt.item || ''}">${truncateText(receipt.item, 20)}</td>
                         <td>${parseFloat(receipt.amount).toLocaleString('th-TH', {minimumFractionDigits: 2})} บาท</td>
                         <td>
                             <button class="action-btn btn-view" onclick="viewReceipt(${receipt.id})" title="ดูรายละเอียด">
@@ -1535,5 +1541,5 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97f8fd67e47d2db8',t:'MTc1Nzk0ODM4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97f9309540187993',t:'MTc1Nzk1MDQ4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
