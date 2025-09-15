@@ -276,9 +276,18 @@
                 <div class="card p-6">
                     <div class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center">
                         <h4 class="kanit mb-0"><i class="fas fa-users text-primary me-2"></i>ข้อมูลผู้รับเงิน</h4>
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recipientModal">
-                            <i class="fas fa-plus me-2"></i>เพิ่มผู้รับเงิน
-                        </button>
+                        <div>
+                            <button type="button" class="btn btn-success me-2" onclick="downloadCSVTemplate()">
+                                <i class="fas fa-download me-2"></i>โหลด CSV Template
+                            </button>
+                            <button type="button" class="btn btn-info me-2" onclick="document.getElementById('csvFileInput').click()">
+                                <i class="fas fa-upload me-2"></i>นำเข้า CSV
+                            </button>
+                            <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="importCSV(event)">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recipientModal">
+                                <i class="fas fa-plus me-2"></i>เพิ่มผู้รับเงิน
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -1219,6 +1228,202 @@
             resetReceiptForm();
         });
 
+        // Download CSV Template function
+        function downloadCSVTemplate() {
+            const csvContent = 'ชื่อ,บ้านเลขที่,หมู่ที่,ตำบล,อำเภอ,จังหวัด\n' +
+                              'นายสมชาย ใจดี,123,1,บ้านใหม่,เมือง,กรุงเทพฯ\n' +
+                              'นางสมหญิง รักดี,456,2,บ้านเก่า,ธัญบุรี,ปทุมธานี';
+            
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'template_ผู้รับเงิน.csv');
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            Swal.fire({
+                title: 'ดาวน์โหลดสำเร็จ',
+                text: 'ไฟล์ Template CSV ถูกดาวน์โหลดเรียบร้อยแล้ว กรุณากรอกข้อมูลตามรูปแบบที่กำหนด',
+                icon: 'success',
+                confirmButtonColor: '#f8bbd9'
+            });
+        }
+
+        // Import CSV function
+        function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                Swal.fire('ข้อผิดพลาด', 'กรุณาเลือกไฟล์ CSV เท่านั้น', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n');
+                    
+                    if (lines.length < 2) {
+                        Swal.fire('ข้อผิดพลาด', 'ไฟล์ CSV ไม่มีข้อมูล', 'error');
+                        return;
+                    }
+                    
+                    // Skip header row
+                    const dataLines = lines.slice(1).filter(line => line.trim());
+                    const importData = [];
+                    const errors = [];
+                    
+                    dataLines.forEach((line, index) => {
+                        const columns = line.split(',').map(col => col.trim().replace(/"/g, ''));
+                        
+                        if (columns.length < 6) {
+                            errors.push(`แถวที่ ${index + 2}: ข้อมูลไม่ครบ (ต้องมี 6 คอลัมน์)`);
+                            return;
+                        }
+                        
+                        const [name, houseNumber, villageNumber, subdistrict, district, province] = columns;
+                        
+                        if (!name || !houseNumber || !subdistrict || !district || !province) {
+                            errors.push(`แถวที่ ${index + 2}: ข้อมูลบังคับไม่ครบ (ชื่อ, บ้านเลขที่, ตำบล, อำเภอ, จังหวัด)`);
+                            return;
+                        }
+                        
+                        importData.push({
+                            name: name,
+                            houseNumber: houseNumber,
+                            villageNumber: villageNumber || '',
+                            subdistrict: subdistrict,
+                            district: district,
+                            province: province
+                        });
+                    });
+                    
+                    if (errors.length > 0) {
+                        Swal.fire({
+                            title: 'พบข้อผิดพลาดในไฟล์',
+                            html: errors.join('<br>'),
+                            icon: 'error',
+                            confirmButtonColor: '#f8bbd9'
+                        });
+                        return;
+                    }
+                    
+                    if (importData.length === 0) {
+                        Swal.fire('ไม่มีข้อมูล', 'ไม่พบข้อมูลที่ถูกต้องในไฟล์', 'warning');
+                        return;
+                    }
+                    
+                    // Confirm import
+                    Swal.fire({
+                        title: 'ยืนยันการนำเข้าข้อมูล',
+                        text: `พบข้อมูลผู้รับเงิน ${importData.length} รายการ ต้องการนำเข้าหรือไม่?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#f8bbd9',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'นำเข้า',
+                        cancelButtonText: 'ยกเลิก'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            processCSVImport(importData);
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error('Error parsing CSV:', error);
+                    Swal.fire('ข้อผิดพลาด', 'ไม่สามารถอ่านไฟล์ CSV ได้', 'error');
+                }
+            };
+            
+            reader.readAsText(file, 'UTF-8');
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Process CSV import
+        function processCSVImport(importData) {
+            $.LoadingOverlay('show');
+            
+            let successCount = 0;
+            let errorCount = 0;
+            const errors = [];
+            
+            // Process imports sequentially to avoid overwhelming the server
+            async function processRecipient(index) {
+                if (index >= importData.length) {
+                    $.LoadingOverlay('hide');
+                    
+                    let message = `นำเข้าข้อมูลเสร็จสิ้น<br>สำเร็จ: ${successCount} รายการ`;
+                    if (errorCount > 0) {
+                        message += `<br>ผิดพลาด: ${errorCount} รายการ`;
+                        if (errors.length > 0) {
+                            message += '<br><br>รายละเอียดข้อผิดพลาด:<br>' + errors.slice(0, 5).join('<br>');
+                            if (errors.length > 5) {
+                                message += '<br>และอีก ' + (errors.length - 5) + ' รายการ...';
+                            }
+                        }
+                    }
+                    
+                    Swal.fire({
+                        title: 'นำเข้าข้อมูลเสร็จสิ้น',
+                        html: message,
+                        icon: errorCount === 0 ? 'success' : 'warning',
+                        confirmButtonColor: '#f8bbd9'
+                    });
+                    
+                    if (successCount > 0) {
+                        loadRecipients();
+                    }
+                    
+                    return;
+                }
+                
+                const recipient = importData[index];
+                
+                try {
+                    const formData = new URLSearchParams();
+                    formData.append('action', 'addRecipient');
+                    formData.append('sheetId', CONFIG.SHEET_ID);
+                    formData.append('name', recipient.name);
+                    formData.append('houseNumber', recipient.houseNumber);
+                    formData.append('villageNumber', recipient.villageNumber);
+                    formData.append('province', recipient.province);
+                    formData.append('district', recipient.district);
+                    formData.append('subdistrict', recipient.subdistrict);
+                    
+                    const response = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                        errors.push(`${recipient.name}: ${data.message || 'ไม่ทราบสาเหตุ'}`);
+                    }
+                } catch (error) {
+                    errorCount++;
+                    errors.push(`${recipient.name}: เกิดข้อผิดพลาดในการส่งข้อมูล`);
+                }
+                
+                // Process next recipient after a short delay
+                setTimeout(() => processRecipient(index + 1), 200);
+            }
+            
+            processRecipient(0);
+        }
+
         // Export to Excel function
         function exportToExcel() {
             if (receipts.length === 0) {
@@ -1330,5 +1535,5 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97d82f3d16437995',t:'MTc1NzYwNDM5Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97f8fd67e47d2db8',t:'MTc1Nzk0ODM4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
