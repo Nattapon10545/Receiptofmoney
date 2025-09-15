@@ -758,9 +758,12 @@
             const tbody = $('#recipientsTableBody');
             tbody.empty();
             
+            // Sort recipients by ID descending (latest first)
+            const sortedRecipients = [...recipients].sort((a, b) => b.id - a.id);
+            
             const startIndex = (currentRecipientPage - 1) * CONFIG.ITEMS_PER_PAGE;
             const endIndex = startIndex + CONFIG.ITEMS_PER_PAGE;
-            const pageRecipients = recipients.slice(startIndex, endIndex);
+            const pageRecipients = sortedRecipients.slice(startIndex, endIndex);
             
             pageRecipients.forEach((recipient, index) => {
                 const row = `
@@ -803,11 +806,53 @@
                 </li>
             `);
             
+            // Smart pagination with ellipsis
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentRecipientPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // Adjust start page if we're near the end
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            // First page and ellipsis
+            if (startPage > 1) {
+                pagination.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="changeRecipientPage(1)">1</a>
+                    </li>
+                `);
+                if (startPage > 2) {
+                    pagination.append(`
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `);
+                }
+            }
+            
             // Page numbers
-            for (let i = 1; i <= totalPages; i++) {
+            for (let i = startPage; i <= endPage; i++) {
                 pagination.append(`
                     <li class="page-item ${i === currentRecipientPage ? 'active' : ''}">
                         <a class="page-link" href="#" onclick="changeRecipientPage(${i})">${i}</a>
+                    </li>
+                `);
+            }
+            
+            // Last page and ellipsis
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    pagination.append(`
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `);
+                }
+                pagination.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="changeRecipientPage(${totalPages})">${totalPages}</a>
                     </li>
                 `);
             }
@@ -834,9 +879,12 @@
             const tbody = $('#receiptsTableBody');
             tbody.empty();
             
+            // Sort receipts by ID descending (latest first)
+            const sortedReceipts = [...receipts].sort((a, b) => b.id - a.id);
+            
             const startIndex = (currentReceiptPage - 1) * CONFIG.ITEMS_PER_PAGE;
             const endIndex = startIndex + CONFIG.ITEMS_PER_PAGE;
-            const pageReceipts = receipts.slice(startIndex, endIndex);
+            const pageReceipts = sortedReceipts.slice(startIndex, endIndex);
             
             pageReceipts.forEach((receipt, index) => {
                 const receiptDate = receipt.receiptDate ? new Date(receipt.receiptDate).toLocaleDateString('th-TH') : '-';
@@ -889,11 +937,53 @@
                 </li>
             `);
             
+            // Smart pagination with ellipsis
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentReceiptPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // Adjust start page if we're near the end
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            // First page and ellipsis
+            if (startPage > 1) {
+                pagination.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="changeReceiptPage(1)">1</a>
+                    </li>
+                `);
+                if (startPage > 2) {
+                    pagination.append(`
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `);
+                }
+            }
+            
             // Page numbers
-            for (let i = 1; i <= totalPages; i++) {
+            for (let i = startPage; i <= endPage; i++) {
                 pagination.append(`
                     <li class="page-item ${i === currentReceiptPage ? 'active' : ''}">
                         <a class="page-link" href="#" onclick="changeReceiptPage(${i})">${i}</a>
+                    </li>
+                `);
+            }
+            
+            // Last page and ellipsis
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    pagination.append(`
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    `);
+                }
+                pagination.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="changeReceiptPage(${totalPages})">${totalPages}</a>
                     </li>
                 `);
             }
@@ -1541,5 +1631,5 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97f9309540187993',t:'MTc1Nzk1MDQ4My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97f94111320f2db0',t:'MTc1Nzk1MTE1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
