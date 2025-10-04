@@ -338,6 +338,7 @@
                                     <tr>
                                         <th>ลำดับ</th>
                                         <th>ปีงบประมาณ</th>
+                                        <th>เลขที่เอกสาร</th>
                                         <th>วันที่รับเงิน</th>
                                         <th>ชื่อผู้รับเงิน</th>
                                         <th>โครงการ</th>
@@ -480,6 +481,10 @@
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
+                                <label for="documentNumber" class="form-label">เลขที่เอกสาร <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="documentNumber" name="documentNumber" placeholder="กรอกเลขที่เอกสาร" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
                                 <label for="receiptDate" class="form-label">วันที่รับเงิน <span class="text-danger">*</span></label>
                                 <input type="date" class="form-control" id="receiptDate" name="receiptDate" required>
                             </div>
@@ -487,7 +492,9 @@
                                 <label for="project" class="form-label">โครงการ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="project" name="project" placeholder="กรอกโครงการ" required>
                             </div>
-                            <div class="col-md-3 mb-3">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
                                 <label for="item" class="form-label">รายการ <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="item" name="item" placeholder="กรอกรายการ" required>
                             </div>
@@ -690,6 +697,7 @@
                 rules: {
                     selectedRecipient: { required: true },
                     fiscalYear: { required: true },
+                    documentNumber: { required: true },
                     receiptDate: { required: true },
                     project: { required: true },
                     item: { required: true },
@@ -699,6 +707,7 @@
                 messages: {
                     selectedRecipient: { required: "กรุณาเลือกผู้รับเงิน" },
                     fiscalYear: { required: "กรุณาเลือกปีงบประมาณ" },
+                    documentNumber: { required: "กรุณากรอกเลขที่เอกสาร" },
                     receiptDate: { required: "กรุณาเลือกวันที่รับเงิน" },
                     project: { required: "กรุณากรอกโครงการ" },
                     item: { required: "กรุณากรอกรายการ" },
@@ -898,6 +907,7 @@
                     <tr>
                         <td>${startIndex + index + 1}</td>
                         <td>${receipt.fiscalYear || '-'}</td>
+                        <td>${receipt.documentNumber || '-'}</td>
                         <td>${receiptDate}</td>
                         <td>${receipt.recipientName}</td>
                         <td title="${receipt.project || ''}">${truncateText(receipt.project, 15)}</td>
@@ -1084,6 +1094,7 @@
             formData.append('district', $('#receiptDistrict').val());
             formData.append('subdistrict', $('#receiptSubdistrict').val());
             formData.append('fiscalYear', $('#fiscalYear').val());
+            formData.append('documentNumber', $('#documentNumber').val());
             formData.append('receiptDate', $('#receiptDate').val());
             formData.append('project', $('#project').val());
             formData.append('item', $('#item').val());
@@ -1212,6 +1223,7 @@
                 html: `
                     <div class="text-start">
                         <p><strong>ปีงบประมาณ:</strong> ${receipt.fiscalYear || '-'}</p>
+                        <p><strong>เลขที่เอกสาร:</strong> ${receipt.documentNumber || '-'}</p>
                         <p><strong>วันที่รับเงิน:</strong> ${receiptDate}</p>
                         <p><strong>ชื่อผู้รับเงิน:</strong> ${receipt.recipientName}</p>
                         <p><strong>ที่อยู่:</strong> ${receipt.houseNumber} หมู่ ${receipt.villageNumber || '-'}</p>
@@ -1246,6 +1258,7 @@
             $('#receiptDistrict').val(receipt.district);
             $('#receiptSubdistrict').val(receipt.subdistrict);
             $('#fiscalYear').val(receipt.fiscalYear);
+            $('#documentNumber').val(receipt.documentNumber);
             $('#receiptDate').val(receipt.receiptDate);
             $('#project').val(receipt.project);
             $('#item').val(receipt.item);
@@ -1546,7 +1559,7 @@
                 
                 // Prepare data for sheet
                 const sheetData = [
-                    ['ลำดับ', 'ปีงบประมาณ', 'วันที่รับเงิน', 'ชื่อผู้รับเงิน', 'บ้านเลขที่', 'หมู่ที่', 'ตำบล', 'อำเภอ', 'จังหวัด', 'โครงการ', 'รายการ', 'จำนวนเงิน', 'จำนวนเงินเป็นตัวหนังสือ', 'ผู้จ่ายเงินคนที่ 1', 'ผู้จ่ายเงินคนที่ 2']
+                    ['ลำดับ', 'ปีงบประมาณ', 'เลขที่เอกสาร', 'วันที่รับเงิน', 'ชื่อผู้รับเงิน', 'บ้านเลขที่', 'หมู่ที่', 'ตำบล', 'อำเภอ', 'จังหวัด', 'โครงการ', 'รายการ', 'จำนวนเงิน', 'จำนวนเงินเป็นตัวหนังสือ', 'ผู้จ่ายเงินคนที่ 1', 'ผู้จ่ายเงินคนที่ 2']
                 ];
 
                 yearReceipts.forEach((receipt, index) => {
@@ -1554,6 +1567,7 @@
                     sheetData.push([
                         index + 1,
                         receipt.fiscalYear || '-',
+                        receipt.documentNumber || '-',
                         receiptDate,
                         receipt.recipientName || '',
                         receipt.houseNumber || '',
@@ -1577,6 +1591,7 @@
                 const colWidths = [
                     { wch: 8 },   // ลำดับ
                     { wch: 12 },  // ปีงบประมาณ
+                    { wch: 15 },  // เลขที่เอกสาร
                     { wch: 15 },  // วันที่รับเงิน
                     { wch: 25 },  // ชื่อผู้รับเงิน
                     { wch: 12 },  // บ้านเลขที่
@@ -1631,5 +1646,5 @@
             });
         }
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97f94111320f2db0',t:'MTc1Nzk1MTE1OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9895056e41ad6034',t:'MTc1OTU4NDQ5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
